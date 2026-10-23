@@ -1,66 +1,59 @@
-'''
-Un istituto vuole gestire un archivio di persone, alcune delle quali sono studenti. Il file di origine dei dati contiene il seguente testo:
-
-P;Mario;Rossi;45
-S;Luca;Bianchi;17;4A;7.5
-P;Anna;Verdi;38
-S;Sara;Neri;18;4B;8.2
-S;Marco;Gialli;17;4A;6.4
-
-Il primo campo indica se si tratta di una Persona oppure uno Studente. Crea due classi, una Persona (definita da nome, cognome, età e metodo descrivi()) e una classe Studente, derivata da Persona, con attributi classe_frequentata, media voti e override della funzione descrivi().
-
-Nel main crea una lista chiamata persone, con dentro sia oggetti di tipo Persone che di tipo Studenti. Calcola poi la media dei voti di tutti gli studenti, e inserisci in un nuovo file (studenti_bravi.txt) solo quelli con una media maggiore o uguale ad 8 (crea tutti i metodi necessari per svolgere questa operazione).
-'''
-
 class Persona:
     def __init__(self, nome:str, cognome:str, eta:int):
         self.nome = nome
         self.cognome = cognome
         self.eta = eta
 
-    def decrivi(self):
-        return f"{self.nome}, {self.cognome}, {self.eta}"
+    def descrivi(self):
+        return f"{self.nome} {self.cognome}, {self.eta}"
+
 
 class Studente(Persona):
-    def __init__(self, nome, cognome, eta, classe:str, media:float):
+    def __init__(self, nome:str, cognome:str, eta:int, classe:str, media:float):
         super().__init__(nome, cognome, eta)
         self.classe = classe
         self.media = media
 
+    #override
     def descrivi(self):
-        studenteStr = super().descrivi() + f", {self.classe}, {self.media}"
-        return studenteStr
-
+        return super().descrivi() + f" Classe: {self.classe} - Media: {self.media}" 
 
 def main():
-    persone = []
-    #carico l'elenco di persone dal file
-    with open("Ereditarietà e polimorfismo\\Esercizi 21-10-2026\\persone.txt", "r") as file:
+    listaPersone = []
+    with open("ereditarietà e polimorfismo\\Esercizi 21-10-2026\\persone.txt", "r") as file:
         contenuto = file.read()
-        righe = contenuto.split("\n") #estraggo una lista di tutte le righe
+        righe = contenuto.split("\n")
         for riga in righe:
-            #ogni riga contiene le informazioni, devo dividerle tra persone e studenti
-            caratteristiche = riga.split(";")
+            elementi = riga.strip().split(";")
+            temp = None
             if riga[0] == "P":
-                #persona
-                persona = Persona(caratteristiche[1], caratteristiche[2], caratteristiche[3])
-                persone.append(persona)
+                temp = Persona(elementi[1], elementi[2], elementi[3])
             else:
-                #studente
-                studente = Studente(caratteristiche[1], caratteristiche[2], caratteristiche[3], caratteristiche[4], caratteristiche[5])
-                persone.append(studente)
+                temp = Studente(elementi[1], elementi[2], elementi[3], elementi[4], float(elementi[5]))
+            listaPersone.append(temp)
 
-        somma = 0
-        conta = 0
-        for p in persone:
-            #se p è uno studente
-            if isinstance(p, Studente): #controlla se p è di tipo Studente
-                #aggiungo valore per il calcolo della media
-                somma += float(p.media)
-                conta += 1
+    for p in listaPersone:
+        print(p.descrivi())
 
-        media = somma/conta
-        print(f"Media: {media:.2f}")
+    #calcolo della media dei soli studenti
+    somma = 0
+    n = 0
+    for p in listaPersone:
+        if isinstance(p, Studente):
+            somma += p.media
+            n += 1
+
+    media = somma/n
+    print(f"{media:.2f}")
+
+    #inserire in file studenti meritevoli
+    with open("ereditarietà e polimorfismo\\Esercizi 21-10-2026\\StudentiMeritevoli.txt", "w") as file:
+        for studente in listaPersone:
+            if isinstance(studente, Studente):
+                if studente.media >= 8:
+                    #scrivi su file
+                    file.write(studente.descrivi()+"\n")
+
 
 if __name__=="__main__":
     main()
